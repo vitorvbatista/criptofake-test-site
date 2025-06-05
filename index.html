@@ -27,7 +27,7 @@
     }
 
     /* Container principal */
-    conteudo {
+    #conteudo {
       display: none;
       width: 100%;
       max-width: 960px;
@@ -60,7 +60,7 @@
     }
 
     /* Mensagem de erro ou status */
-    mensagem {
+    #mensagem {
       font-weight: 600;
       margin-bottom: 20px;
       color: #c02942; /* vermelho suave */
@@ -107,7 +107,7 @@
     }
 
     /* Canvas do gráfico com sombra e bordas arredondadas */
-    canvascandlestickChart {
+    #canvascandlestickChart {
       background: white;
       border-radius: 16px;
       box-shadow: 0 12px 30px rgb(91 10 216 / 0.25);
@@ -128,7 +128,7 @@
     }
 
     /* Parágrafos de status da compra e venda */
-    statusCompra, statusVenda {
+    #statusCompra, #statusVenda {
       margin-top: 10px;
       font-weight: 600;
       color: #3a0271;
@@ -169,7 +169,6 @@
 
     <h3>Vender LAVYA</h3>
     <input type="number" id="tokenAmount" placeholder="Quantidade de tokens" step="0.00000001" min="0.00000001" >
-    <input type="number" id="tokenAmount" placeholder="Quantidade de tokens" step="0.00000001" min="0.00000001">
     <button onclick="venderTokens()">Vender Tokens</button>
     <p id="statusVenda"></p>
   </div>
@@ -244,22 +243,15 @@
         });
       }
 
-      function agruparEventosPorMinuto(eventos) {
       function agruparEventosPor5Minutos(eventos) {
         const grupos = {};
         eventos.forEach(ev => {
-          const minuto = Math.floor(ev.timestamp / 60);
-          if (!grupos[minuto]) grupos[minuto] = [];
-          grupos[minuto].push(ev);
-          // Timestamp em minutos dividido por 5, arredondado para baixo e multiplicado por 5
           const minutoAgrupado = Math.floor(ev.timestamp / 60 / 5) * 5;
           if (!grupos[minutoAgrupado]) grupos[minutoAgrupado] = [];
           grupos[minutoAgrupado].push(ev);
         });
         return grupos;
       }
-
-      const grupos = agruparEventosPorMinuto(eventos);
 
       const grupos = agruparEventosPor5Minutos(eventos);
       const candles = [];
@@ -287,7 +279,6 @@
 
         candles.push({
           x: grupo[0].timestamp * 1000,
-          x: parseInt(key) * 60 * 1000,
           o: open,
           h: high,
           l: low,
