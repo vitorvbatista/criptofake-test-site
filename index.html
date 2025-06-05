@@ -1,300 +1,348 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Gráfico Token Personalizado</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
-  <style>
+<meta charset="UTF-8">
+<title>Gráfico Token Personalizado</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
+<style>
+    /* Reset básico e fonte moderna */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
-      padding: 40px 20px;
-      background: linear-gradient(135deg, #ffffff 0%, #5b0ad8 100%);
-      color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #conteudo {
-      display: none;
-      width: 100%;
-      max-width: 960px;
-      background: rgba(255 255 255 / 0.9);
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 16px 48px rgb(91 10 216 / 0.4);
-      margin-top: 30px;
-      backdrop-filter: blur(10px);
-    }
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-      color: #3a0271;
-      text-shadow: 0 0 6px rgb(91 10 216 / 0.7);
-    }
-    .logo {
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+min-height: 100vh;
+padding: 40px 20px;
+background: linear-gradient(135deg, #ffffff 0%, #5b0ad8 100%);
+color: #222;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+    /* Container principal */
+#conteudo {
+display: none;
+width: 100%;
+max-width: 960px;
+background: rgba(255 255 255 / 0.9);
+padding: 30px;
+border-radius: 16px;
+box-shadow: 0 16px 48px rgb(91 10 216 / 0.4);
+margin-top: 30px;
+backdrop-filter: blur(10px);
+}
+
+    /* Cabeçalho */
+header {
+text-align: center;
+margin-bottom: 40px;
+color: #3a0271;
+text-shadow: 0 0 6px rgb(91 10 216 / 0.7);
+}
+.logo {
+      width: 120px;
       width: 200px;
-      height: auto;
-      margin-bottom: 10px;
-      filter: drop-shadow(0 0 5px #5b0ad8);
-    }
-    h2 {
-      font-weight: 700;
-      font-size: 2.2rem;
-    }
-    #mensagem {
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: #c02942;
-      text-align: center;
-      min-height: 1.5em;
-    }
-    button {
-      background: #5b0ad8;
-      border: none;
-      color: white;
-      font-weight: 600;
-      font-size: 1.1rem;
-      padding: 12px 28px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      margin-top: 10px;
-      user-select: none;
-      box-shadow: 0 6px 15px rgb(91 10 216 / 0.5);
-    }
-    button:hover {
-      background: #7e2df0;
-      box-shadow: 0 10px 25px rgb(126 45 240 / 0.7);
-    }
-    input {
-      padding: 12px 16px;
-      font-size: 1.1rem;
-      border: 2px solid #5b0ad8;
-      border-radius: 10px;
-      width: 220px;
-      transition: border-color 0.3s ease;
-      outline-offset: 2px;
-      margin-top: 10px;
-    }
-    input:focus {
-      border-color: #7e2df0;
-      outline: none;
-      box-shadow: 0 0 8px 2px rgb(126 45 240 / 0.6);
-    }
-    canvas#candlestickChart {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgb(91 10 216 / 0.25);
-      display: block;
-      margin: 0 auto 40px auto;
-      max-width: 100%;
-      height: auto !important;
-    }
-    h3 {
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: #4a007f;
-      margin-top: 30px;
+height: auto;
       margin-bottom: 12px;
-      text-shadow: 0 0 4px rgb(91 10 216 / 0.6);
-    }
-    #statusCompra, #statusVenda {
-      margin-top: 10px;
-      font-weight: 600;
-      color: #3a0271;
-      min-height: 1.5em;
-    }
-    body > button {
-      display: block;
-      margin: 0 auto 20px auto;
-    }
-  </style>
+      margin-bottom: 10px;
+filter: drop-shadow(0 0 5px #5b0ad8);
+}
+h2 {
+font-weight: 700;
+font-size: 2.2rem;
+}
+
+    /* Mensagem de erro ou status */
+#mensagem {
+font-weight: 600;
+margin-bottom: 20px;
+      color: #c02942; /* vermelho suave */
+      color: #c02942;
+text-align: center;
+min-height: 1.5em;
+}
+
+    /* Botões estilizados */
+button {
+background: #5b0ad8;
+border: none;
+color: white;
+font-weight: 600;
+font-size: 1.1rem;
+padding: 12px 28px;
+border-radius: 10px;
+cursor: pointer;
+transition: background-color 0.3s ease, box-shadow 0.3s ease;
+margin-top: 10px;
+user-select: none;
+box-shadow: 0 6px 15px rgb(91 10 216 / 0.5);
+}
+button:hover {
+background: #7e2df0;
+box-shadow: 0 10px 25px rgb(126 45 240 / 0.7);
+}
+
+    /* Inputs com estilo moderno */
+input {
+padding: 12px 16px;
+font-size: 1.1rem;
+border: 2px solid #5b0ad8;
+border-radius: 10px;
+width: 220px;
+transition: border-color 0.3s ease;
+outline-offset: 2px;
+margin-top: 10px;
+}
+input:focus {
+border-color: #7e2df0;
+outline: none;
+box-shadow: 0 0 8px 2px rgb(126 45 240 / 0.6);
+}
+
+    /* Canvas do gráfico com sombra e bordas arredondadas */
+canvas#candlestickChart {
+background: white;
+border-radius: 16px;
+box-shadow: 0 12px 30px rgb(91 10 216 / 0.25);
+display: block;
+margin: 0 auto 40px auto;
+max-width: 100%;
+height: auto !important;
+}
+
+    /* Títulos das seções */
+h3 {
+font-weight: 700;
+font-size: 1.5rem;
+color: #4a007f;
+margin-top: 30px;
+margin-bottom: 12px;
+text-shadow: 0 0 4px rgb(91 10 216 / 0.6);
+}
+
+    /* Parágrafos de status da compra e venda */
+#statusCompra, #statusVenda {
+margin-top: 10px;
+font-weight: 600;
+color: #3a0271;
+min-height: 1.5em;
+}
+
+    /* Centralizar botão de conectar */
+body > button {
+display: block;
+margin: 0 auto 20px auto;
+}
+
+    .logo {
+    width: 200px;  /* aumenta o tamanho da imagem */
+    height: auto;  /* mantém a proporção */
+    margin-bottom: 10px;
+  }
+
+</style>
 </head>
 <body>
-  <header>
-    <img src="https://raw.githubusercontent.com/vitorvbatista/criptofake-test-site/main/logo-lavya.png" alt="Logo LAVYA" class="logo">
-    <h2>Gráfico de Preço - cripto.LAVYA</h2>
-  </header>
-  <div id="mensagem">Conecte sua carteira para verificar acesso...</div>
-  <button onclick="verificarCarteira()">Conectar Carteira</button>
-  <div id="conteudo">
-    <canvas id="candlestickChart" width="900" height="400" style="background: #ffffff;"></canvas>
-    <h3>Comprar LAVYA</h3>
-    <input type="number" id="ethAmount" placeholder="Quantidade em ETH" step="0.01" min="0.001">
-    <button onclick="comprarTokens()">Comprar Tokens</button>
-    <p id="statusCompra"></p>
-    <h3>Vender LAVYA</h3>
+
+<header>
+<img src="https://raw.githubusercontent.com/vitorvbatista/criptofake-test-site/main/logo-lavya.png" alt="Logo LAVYA" class="logo">
+<h2>Gráfico de Preço - cripto.LAVYA</h2>
+</header>
+
+<div id="mensagem">Conecte sua carteira para verificar acesso...</div>
+<button onclick="verificarCarteira()">Conectar Carteira</button>
+
+<div id="conteudo">
+<canvas id="candlestickChart" width="900" height="400" style="background: #ffffff;"></canvas>
+
+<h3>Comprar LAVYA</h3>
+<input type="number" id="ethAmount" placeholder="Quantidade em ETH" step="0.01" min="0.001">
+<button onclick="comprarTokens()">Comprar Tokens</button>
+<p id="statusCompra"></p>
+
+<h3>Vender LAVYA</h3>
+    <input type="number" id="tokenAmount" placeholder="Quantidade de tokens" step="0.00000001" min="0.00000001" >
     <input type="number" id="tokenAmount" placeholder="Quantidade de tokens" step="0.00000001" min="0.00000001">
-    <button onclick="venderTokens()">Vender Tokens</button>
-    <p id="statusVenda"></p>
-  </div>
-  <script>
-    const WHITELIST = [
-      "0x1EC7712B5b5CB0DB4d72186639A350918f5DC0E8",
-      "0x548e595D3f9d0e1E7A02bDE373236b583F8DF344",
-      "0xb6d1C447e509ce54Bbf73FB22CE7432cB5dE4728",
-      "0xFA498C63E7aE72d097b1D6b435675c429B9392C5"];
+<button onclick="venderTokens()">Vender Tokens</button>
+<p id="statusVenda"></p>
+</div>
 
-    const contractAddress = '0x65B69B7C763bE31457ECBf47B25df52dD454Fd8e';
-    const abi = [
-      { "inputs": [], "name": "buyTokens", "outputs": [], "stateMutability": "payable", "type": "function" },
-      { "inputs": [ { "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "success", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" },
-      { "inputs": [ { "internalType": "uint256", "name": "_amount", "type": "uint256" } ], "name": "sellTokens", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-      { "inputs": [ { "internalType": "uint256", "name": "_initialSupply", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "constructor" },
-      { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" },
-      { "inputs": [], "name": "withdrawETH", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-      { "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
-      { "inputs": [], "name": "decimals", "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ], "stateMutability": "view", "type": "function" },
-      { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" },
-      { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" },
-      { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }
-    ];
+<script>
+const WHITELIST = [
+"0x1EC7712B5b5CB0DB4d72186639A350918f5DC0E8",
+"0x548e595D3f9d0e1E7A02bDE373236b583F8DF344",
+"0xb6d1C447e509ce54Bbf73FB22CE7432cB5dE4728",
+"0xFA498C63E7aE72d097b1D6b435675c429B9392C5"];
 
-    async function verificarCarteira() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const wallet = accounts[0].toLowerCase();
-          const permitido = WHITELIST.map(addr => addr.toLowerCase()).includes(wallet);
-          if (permitido) {
-            document.getElementById("mensagem").innerText = "Carteira autorizada!";
-            document.getElementById("conteudo").style.display = "block";
-            carregarGrafico();
-          } else {
-            document.getElementById("mensagem").innerText = "Acesso negado. Sua carteira não está autorizada.";
-            document.getElementById("conteudo").style.display = "none";
-          }
-        } catch (err) {
-          document.getElementById("mensagem").innerText = "Erro ao conectar à carteira.";
-        }
-      } else {
-        document.getElementById("mensagem").innerText = "MetaMask não detectado.";
-      }
-    }
+const contractAddress = '0x65B69B7C763bE31457ECBf47B25df52dD454Fd8e';
+const abi = [
+{ "inputs": [], "name": "buyTokens", "outputs": [], "stateMutability": "payable", "type": "function" },
+{ "inputs": [ { "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "success", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" },
+{ "inputs": [ { "internalType": "uint256", "name": "_amount", "type": "uint256" } ], "name": "sellTokens", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+{ "inputs": [ { "internalType": "uint256", "name": "_initialSupply", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "constructor" },
+{ "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" },
+{ "inputs": [], "name": "withdrawETH", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+{ "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
+{ "inputs": [], "name": "decimals", "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ], "stateMutability": "view", "type": "function" },
+{ "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" },
+{ "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" },
+{ "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }
+];
 
-    async function carregarGrafico() {
-      const web3 = new Web3(window.ethereum);
-      const contract = new web3.eth.Contract(abi, contractAddress);
+async function verificarCarteira() {
+if (window.ethereum) {
+try {
+const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+const wallet = accounts[0].toLowerCase();
+const permitido = WHITELIST.map(addr => addr.toLowerCase()).includes(wallet);
 
-      function valorToNumber(valorBigInt) {
-        return parseFloat(web3.utils.fromWei(valorBigInt.toString(), 'ether'));
-      }
+if (permitido) {
+document.getElementById("mensagem").innerText = "Carteira autorizada!";
+document.getElementById("conteudo").style.display = "block";
+carregarGrafico();
+} else {
+document.getElementById("mensagem").innerText = "Acesso negado. Sua carteira não está autorizada.";
+document.getElementById("conteudo").style.display = "none";
+}
+} catch (err) {
+document.getElementById("mensagem").innerText = "Erro ao conectar à carteira.";
+}
+} else {
+document.getElementById("mensagem").innerText = "MetaMask não detectado.";
+}
+}
 
-      const latest = await web3.eth.getBlockNumber();
-      const fromBlock = Number(latest) - 5000;
+async function carregarGrafico() {
+const web3 = new Web3(window.ethereum);
+const contract = new web3.eth.Contract(abi, contractAddress);
 
-      const eventosBrutos = await contract.getPastEvents("Transfer", {
-        fromBlock: fromBlock,
-        toBlock: "latest"
-      });
+function valorToNumber(valorBigInt) {
+return parseFloat(web3.utils.fromWei(valorBigInt.toString(), 'ether'));
+}
 
-      const eventos = [];
-      for (let ev of eventosBrutos) {
-        const bloco = await web3.eth.getBlock(ev.blockNumber);
-        eventos.push({
-          value: ev.returnValues.value.toString(),
-          timestamp: Number(bloco.timestamp)
-        });
-      }
+const latest = await web3.eth.getBlockNumber();
+const fromBlock = Number(latest) - 5000;
 
+const eventosBrutos = await contract.getPastEvents("Transfer", {
+fromBlock: fromBlock,
+toBlock: "latest"
+});
+
+const eventos = [];
+for (let ev of eventosBrutos) {
+const bloco = await web3.eth.getBlock(ev.blockNumber);
+eventos.push({
+value: ev.returnValues.value.toString(),
+timestamp: Number(bloco.timestamp)
+});
+}
+
+      function agruparEventosPorMinuto(eventos) {
       function agruparEventosPor5Minutos(eventos) {
-        const grupos = {};
-        eventos.forEach(ev => {
+const grupos = {};
+eventos.forEach(ev => {
+          const minuto = Math.floor(ev.timestamp / 60);
+          if (!grupos[minuto]) grupos[minuto] = [];
+          grupos[minuto].push(ev);
           // Timestamp em minutos dividido por 5, arredondado para baixo e multiplicado por 5
           const minutoAgrupado = Math.floor(ev.timestamp / 60 / 5) * 5;
           if (!grupos[minutoAgrupado]) grupos[minutoAgrupado] = [];
           grupos[minutoAgrupado].push(ev);
-        });
-        return grupos;
-      }
+});
+return grupos;
+}
 
+      const grupos = agruparEventosPorMinuto(eventos);
 
       const grupos = agruparEventosPor5Minutos(eventos);
-      const candles = [];
+const candles = [];
 
-      for (const key in grupos) {
-        const grupo = grupos[key];
-        grupo.sort((a, b) => a.timestamp - b.timestamp);
+for (const key in grupos) {
+const grupo = grupos[key];
+grupo.sort((a, b) => a.timestamp - b.timestamp);
 
-        const open = valorToNumber(grupo[0].value);
-        const close = valorToNumber(grupo[grupo.length - 1].value);
+const open = valorToNumber(grupo[0].value);
+const close = valorToNumber(grupo[grupo.length - 1].value);
 
-        let high = open;
-        let low = open;
+let high = open;
+let low = open;
 
-        for (let e of grupo) {
-          const val = valorToNumber(e.value);
-          if (val > high) high = val;
-          if (val < low) low = val;
-        }
+for (let e of grupo) {
+const val = valorToNumber(e.value);
+if (val > high) high = val;
+if (val < low) low = val;
+}
 
-        if (high === low) {
-          high += 0.0000001;
-          low -= 0.0000001;
-        }
+if (high === low) {
+high += 0.0000001;
+low -= 0.0000001;
+}
 
-        candles.push({
+candles.push({
+          x: grupo[0].timestamp * 1000,
           x: parseInt(key) * 60 * 1000,
-          o: open,
-          h: high,
-          l: low,
-          c: close
-        });
-      }
+o: open,
+h: high,
+l: low,
+c: close
+});
+}
 
-      candles.sort((a, b) => a.x - b.x);
-      desenharGrafico(candles);
-    }
+candles.sort((a, b) => a.x - b.x);
+desenharGrafico(candles);
+}
 
-    function desenharGrafico(candles) {
-      const ctx = document.getElementById('candlestickChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'candlestick',
-        data: {
-          datasets: [{
-            label: 'Token - Atividade Real',
-            data: candles,
-            borderColor: 'black',
+function desenharGrafico(candles) {
+const ctx = document.getElementById('candlestickChart').getContext('2d');
+new Chart(ctx, {
+type: 'candlestick',
+data: {
+datasets: [{
+label: 'Token - Atividade Real',
+data: candles,
+borderColor: 'black',
             barThickness: 10,
-            color: {
-              up: '#00ff00',
-              down: '#ff0000',
-              unchanged: '#999999'
-            }
-          }]
-        },
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: 'Gráfico Candlestick das Transações do Token'
-            }
-          },
-          parsing: {
-            xAxisKey: 'x',
-            openKey: 'o',
-            highKey: 'h',
-            lowKey: 'l',
-            closeKey: 'c'
-          },
-          scales: {
-            x: {
-              type: 'time',
-              adapters: {
-                date: luxon.DateTime
-              },
-              time: {
-                tooltipFormat: 'dd LLL yyyy HH:mm',
-                unit: 'minute',
-                displayFormats: {
-                  minute: 'HH:mm'
-                }
+color: {
+up: '#00ff00',
+down: '#ff0000',
+unchanged: '#999999'
+}
+}]
+},
+options: {
+plugins: {
+title: {
+display: true,
+text: 'Gráfico Candlestick das Transações do Token'
+}
+},
+parsing: {
+xAxisKey: 'x',
+openKey: 'o',
+highKey: 'h',
+lowKey: 'l',
+closeKey: 'c'
+},
+scales: {
+x: {
+type: 'time',
+adapters: {
+date: luxon.DateTime
+},
+time: {
+tooltipFormat: 'dd LLL yyyy HH:mm',
+unit: 'minute',
+displayFormats: {
+minute: 'HH:mm'
+}
               },
               ticks: {
                 autoSkip: true,
@@ -304,16 +352,64 @@
             },
             y: {
               min: 0,
-              max: 20,
+              max: 10,
               title: {
                 display: true,
                 text: 'Valor em LAVYA'
-              }
-            }
-          }
-        }
-      });
+}
+}
+}
+}
+});
+}
+
+    async function comprarTokens() {
+      const ethAmount = document.getElementById('ethAmount').value;
+      if (!ethAmount || ethAmount <= 0) {
+        document.getElementById('statusCompra').innerText = 'Digite um valor válido em ETH.';
+        return;
+      }
+
+      const web3 = new Web3(window.ethereum);
+      const contract = new web3.eth.Contract(abi, contractAddress);
+      const accounts = await web3.eth.getAccounts();
+
+      try {
+        await contract.methods.buyTokens().send({
+          from: accounts[0],
+          value: web3.utils.toWei(ethAmount, 'ether'),
+          gas: 200000
+        });
+        document.getElementById('statusCompra').innerText = 'Compra realizada com sucesso!';
+      } catch (e) {
+        document.getElementById('statusCompra').innerText = 'Erro na compra: ' + e.message;
+      }
     }
-  </script>
+
+    async function venderTokens() {
+      const tokenAmount = document.getElementById('tokenAmount').value;
+      if (!tokenAmount || tokenAmount <= 0) {
+        document.getElementById('statusVenda').innerText = 'Digite uma quantidade válida de tokens.';
+        return;
+      }
+
+      const web3 = new Web3(window.ethereum);
+      const contract = new web3.eth.Contract(abi, contractAddress);
+      const accounts = await web3.eth.getAccounts();
+
+      try {
+        // Convertendo tokenAmount para o valor base (considerando 18 decimais)
+        const amountWei = web3.utils.toWei(tokenAmount, 'ether');
+        await contract.methods.sellTokens(amountWei).send({
+          from: accounts[0],
+          gas: 200000
+        });
+        document.getElementById('statusVenda').innerText = 'Venda realizada com sucesso!';
+      } catch (e) {
+        document.getElementById('statusVenda').innerText = 'Erro na venda: ' + e.message;
+      }
+    }
+</script>
+
 </body>
 </html>
