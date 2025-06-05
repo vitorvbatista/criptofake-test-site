@@ -9,12 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
   <style>
-    /* Reset básico e fonte moderna */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
@@ -25,8 +20,6 @@
       flex-direction: column;
       align-items: center;
     }
-
-    /* Container principal */
     #conteudo {
       display: none;
       width: 100%;
@@ -38,8 +31,6 @@
       margin-top: 30px;
       backdrop-filter: blur(10px);
     }
-
-    /* Cabeçalho */
     header {
       text-align: center;
       margin-bottom: 40px;
@@ -47,26 +38,22 @@
       text-shadow: 0 0 6px rgb(91 10 216 / 0.7);
     }
     .logo {
-      width: 120px;
+      width: 200px;
       height: auto;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       filter: drop-shadow(0 0 5px #5b0ad8);
     }
     h2 {
       font-weight: 700;
       font-size: 2.2rem;
     }
-
-    /* Mensagem de erro ou status */
     #mensagem {
       font-weight: 600;
       margin-bottom: 20px;
-      color: #c02942; /* vermelho suave */
+      color: #c02942;
       text-align: center;
       min-height: 1.5em;
     }
-
-    /* Botões estilizados */
     button {
       background: #5b0ad8;
       border: none;
@@ -85,8 +72,6 @@
       background: #7e2df0;
       box-shadow: 0 10px 25px rgb(126 45 240 / 0.7);
     }
-
-    /* Inputs com estilo moderno */
     input {
       padding: 12px 16px;
       font-size: 1.1rem;
@@ -102,8 +87,6 @@
       outline: none;
       box-shadow: 0 0 8px 2px rgb(126 45 240 / 0.6);
     }
-
-    /* Canvas do gráfico com sombra e bordas arredondadas */
     canvas#candlestickChart {
       background: white;
       border-radius: 16px;
@@ -113,8 +96,6 @@
       max-width: 100%;
       height: auto !important;
     }
-
-    /* Títulos das seções */
     h3 {
       font-weight: 700;
       font-size: 1.5rem;
@@ -123,53 +104,36 @@
       margin-bottom: 12px;
       text-shadow: 0 0 4px rgb(91 10 216 / 0.6);
     }
-
-    /* Parágrafos de status da compra e venda */
     #statusCompra, #statusVenda {
       margin-top: 10px;
       font-weight: 600;
       color: #3a0271;
       min-height: 1.5em;
     }
-
-    /* Centralizar botão de conectar */
     body > button {
       display: block;
       margin: 0 auto 20px auto;
     }
-
-    .logo {
-    width: 200px;  /* aumenta o tamanho da imagem */
-    height: auto;  /* mantém a proporção */
-    margin-bottom: 10px;
-  }
-
   </style>
 </head>
 <body>
-
   <header>
     <img src="https://raw.githubusercontent.com/vitorvbatista/criptofake-test-site/main/logo-lavya.png" alt="Logo LAVYA" class="logo">
     <h2>Gráfico de Preço - cripto.LAVYA</h2>
   </header>
-
   <div id="mensagem">Conecte sua carteira para verificar acesso...</div>
   <button onclick="verificarCarteira()">Conectar Carteira</button>
-
   <div id="conteudo">
     <canvas id="candlestickChart" width="900" height="400" style="background: #ffffff;"></canvas>
-
     <h3>Comprar LAVYA</h3>
     <input type="number" id="ethAmount" placeholder="Quantidade em ETH" step="0.01" min="0.001">
     <button onclick="comprarTokens()">Comprar Tokens</button>
     <p id="statusCompra"></p>
-
     <h3>Vender LAVYA</h3>
-    <input type="number" id="tokenAmount" placeholder="Quantidade de tokens" step="0.00000001" min="0.00000001" >
+    <input type="number" id="tokenAmount" placeholder="Quantidade de tokens" step="0.00000001" min="0.00000001">
     <button onclick="venderTokens()">Vender Tokens</button>
     <p id="statusVenda"></p>
   </div>
-
   <script>
     const WHITELIST = [
       "0x1EC7712B5b5CB0DB4d72186639A350918f5DC0E8",
@@ -198,7 +162,6 @@
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
           const wallet = accounts[0].toLowerCase();
           const permitido = WHITELIST.map(addr => addr.toLowerCase()).includes(wallet);
-
           if (permitido) {
             document.getElementById("mensagem").innerText = "Carteira autorizada!";
             document.getElementById("conteudo").style.display = "block";
@@ -240,17 +203,19 @@
         });
       }
 
-      function agruparEventosPorMinuto(eventos) {
+      function agruparEventosPor5Minutos(eventos) {
         const grupos = {};
         eventos.forEach(ev => {
-          const minuto = Math.floor(ev.timestamp / 60);
-          if (!grupos[minuto]) grupos[minuto] = [];
-          grupos[minuto].push(ev);
+          // Timestamp em minutos dividido por 5, arredondado para baixo e multiplicado por 5
+          const minutoAgrupado = Math.floor(ev.timestamp / 60 / 5) * 5;
+          if (!grupos[minutoAgrupado]) grupos[minutoAgrupado] = [];
+          grupos[minutoAgrupado].push(ev);
         });
         return grupos;
       }
 
-      const grupos = agruparEventosPorMinuto(eventos);
+
+      const grupos = agruparEventosPor5Minutos(eventos);
       const candles = [];
 
       for (const key in grupos) {
@@ -275,7 +240,7 @@
         }
 
         candles.push({
-          x: grupo[0].timestamp * 1000,
+          x: parseInt(key) * 60 * 1000,
           o: open,
           h: high,
           l: low,
@@ -296,6 +261,7 @@
             label: 'Token - Atividade Real',
             data: candles,
             borderColor: 'black',
+            barThickness: 10,
             color: {
               up: '#00ff00',
               down: '#ff0000',
@@ -329,60 +295,25 @@
                 displayFormats: {
                   minute: 'HH:mm'
                 }
+              },
+              ticks: {
+                autoSkip: true,
+                maxRotation: 0,
+                minRotation: 0
+              }
+            },
+            y: {
+              min: 0,
+              max: 10,
+              title: {
+                display: true,
+                text: 'Valor em LAVYA'
               }
             }
           }
         }
       });
     }
-
-    async function comprarTokens() {
-      const ethAmount = document.getElementById('ethAmount').value;
-      if (!ethAmount || ethAmount <= 0) {
-        document.getElementById('statusCompra').innerText = 'Digite um valor válido em ETH.';
-        return;
-      }
-
-      const web3 = new Web3(window.ethereum);
-      const contract = new web3.eth.Contract(abi, contractAddress);
-      const accounts = await web3.eth.getAccounts();
-
-      try {
-        await contract.methods.buyTokens().send({
-          from: accounts[0],
-          value: web3.utils.toWei(ethAmount, 'ether'),
-          gas: 200000
-        });
-        document.getElementById('statusCompra').innerText = 'Compra realizada com sucesso!';
-      } catch (e) {
-        document.getElementById('statusCompra').innerText = 'Erro na compra: ' + e.message;
-      }
-    }
-
-    async function venderTokens() {
-      const tokenAmount = document.getElementById('tokenAmount').value;
-      if (!tokenAmount || tokenAmount <= 0) {
-        document.getElementById('statusVenda').innerText = 'Digite uma quantidade válida de tokens.';
-        return;
-      }
-
-      const web3 = new Web3(window.ethereum);
-      const contract = new web3.eth.Contract(abi, contractAddress);
-      const accounts = await web3.eth.getAccounts();
-
-      try {
-        // Convertendo tokenAmount para o valor base (considerando 18 decimais)
-        const amountWei = web3.utils.toWei(tokenAmount, 'ether');
-        await contract.methods.sellTokens(amountWei).send({
-          from: accounts[0],
-          gas: 200000
-        });
-        document.getElementById('statusVenda').innerText = 'Venda realizada com sucesso!';
-      } catch (e) {
-        document.getElementById('statusVenda').innerText = 'Erro na venda: ' + e.message;
-      }
-    }
   </script>
-
 </body>
 </html>
